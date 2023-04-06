@@ -56,10 +56,8 @@ func (tmp *Lexer) CommandMkdir() {
 	fit := tmp.fitParameter(false)
 	unit := tmp.unitParameter(false)
 	if pathMkdir != "" && size > 0 {
-		fmt.Println(pathMkdir + " esta es la path")
-		fmt.Println(strconv.Itoa(size) + " este es el size")
-		fmt.Println(fit)
-		fmt.Println(unit)
+		tmp := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
+		tmp.Execute()
 	}
 
 }
