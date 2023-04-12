@@ -17,9 +17,9 @@ func (tmp *Lexer) GeneralComand(command string) {
 	if matched, _ := regexp.Match("(mkdisk)(.*)", []byte(tmp.CommandString)); matched {
 		tmp.CommandMkdir()
 	} else if matched, _ := regexp.Match("(rmdisk)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando rmdisk")
+		tmp.CommandRmdisk()
 	} else if matched, _ := regexp.Match("(fdisk)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando fdisk")
+		tmp.CommandFdisk()
 	} else if matched, _ := regexp.Match("(mount)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando mount")
 	} else if matched, _ := regexp.Match("(unmount)(.*)", []byte(tmp.CommandString)); matched {
@@ -53,13 +53,72 @@ func (tmp *Lexer) GeneralComand(command string) {
 func (tmp *Lexer) CommandMkdir() {
 	pathMkdir := tmp.PathParameter(true)
 	size := tmp.SizeParameter(true)
-	fit := tmp.fitParameter(false)
-	unit := tmp.unitParameter(false)
+	fit := tmp.FitParameter(false)
+	unit := tmp.UnitParameter(false)
 	if pathMkdir != "" && size > 0 {
 		tmp := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
 		tmp.Execute()
 	}
+}
 
+/*This method is used for delete file binari*/
+func (tmp *Lexer) CommandRmdisk() {
+	path := tmp.PathParameter(true)
+	if path != "" {
+		rmdisk := Rmdisk{Path: path}
+		rmdisk.Execute()
+	}
+}
+
+/*This method is used for modifi ofs patrtitions*/
+func (tmp *Lexer) CommandFdisk() {
+	name := tmp.NameParameter(true)
+	fit := tmp.FitParameter(false)
+	typeFdisk := tmp.TypeParameter(false)
+	pathFdisk := tmp.PathParameter(true)
+	sizeFdisk := tmp.SizeParameter(true)
+	unitfdisk := tmp.UnitParameter(false)
+	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
+	fmt.Println(fdisk)
+}
+
+/*The parameter Name contain the name of partition*/
+func (tmp *Lexer) NameParameter(obligatory bool) string {
+	cadena := ""
+	if matched, _ := regexp.Match(">name=[\"?[a-zA-Z0-9\\_]+\"?", []byte(tmp.CommandString)); matched {
+		regeName := regexp.MustCompile(">name=[\"?[a-zA-Z0-9\\_]+\"?")
+		content := regeName.FindAllString(tmp.CommandString, -1)
+		if len(content) > 0 {
+			cadena = content[0]
+			cadena = strings.Trim(cadena, ">name=")
+		}
+	} else if obligatory {
+		fmt.Println("El parametro size es obligatorio")
+		cadena = ""
+	} else {
+		cadena = ""
+	}
+	return cadena
+}
+
+/*The parameter Type contain the type of partition*/
+func (tmp *Lexer) TypeParameter(obligatory bool) byte {
+	var typeTmp byte
+	if matched, _ := regexp.Match(">type=[a-zA-Z]", []byte(tmp.CommandString)); matched {
+		regeType := regexp.MustCompile(">type=[a-zA-Z]")
+		content := regeType.FindAllString(tmp.CommandString, -1)
+		if len(content) > 0 {
+			tmpString := content[0]
+			replace := regexp.MustCompile(">type=")
+			tmpString = replace.ReplaceAllString(tmpString, "")
+			typeTmp = tmpString[0]
+		}
+	} else if obligatory {
+		fmt.Println("El parametro Type es obligatorio")
+	} else {
+		typeTmp = 'o'
+	}
+	return typeTmp
 }
 
 /* The parameter path contain the path where create file bin*/
@@ -111,7 +170,7 @@ func (tmp *Lexer) SizeParameter(obligatory bool) int {
 }
 
 /* This parameter fit contain the configuration of asignation of disk or partition*/
-func (tmp *Lexer) fitParameter(obligatory bool) byte {
+func (tmp *Lexer) FitParameter(obligatory bool) byte {
 	var fit byte
 	var tmpString string
 	if matched, _ := regexp.Match(">fit=", []byte(tmp.CommandString)); matched {
@@ -138,7 +197,7 @@ func (tmp *Lexer) fitParameter(obligatory bool) byte {
 }
 
 /* The parameter unit contain de information respect the type of storage in the disk or partition*/
-func (tmp *Lexer) unitParameter(obligatory bool) byte {
+func (tmp *Lexer) UnitParameter(obligatory bool) byte {
 	var unit byte
 	var tmpString string
 	if matched, _ := regexp.Match(">unit=", []byte(tmp.CommandString)); matched {
