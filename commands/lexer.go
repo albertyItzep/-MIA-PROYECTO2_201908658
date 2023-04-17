@@ -78,8 +78,9 @@ func (tmp *Lexer) CommandFdisk() {
 	pathFdisk := tmp.PathParameter(true)
 	sizeFdisk := tmp.SizeParameter(true)
 	unitfdisk := tmp.UnitParameter(false)
+	fmt.Println(sizeFdisk)
 	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
-	fmt.Println(fdisk)
+	fdisk.Execute()
 }
 
 /*The parameter Name contain the name of partition*/

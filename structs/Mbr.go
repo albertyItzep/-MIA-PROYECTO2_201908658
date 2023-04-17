@@ -18,3 +18,20 @@ type MBR struct {
 	Mbr_partition3     Partition
 	Mbr_partition4     Partition
 }
+
+func (tmp *MBR) InitialPartitions() {
+	tmp.Mbr_partition1.Part_status = 'f'
+	tmp.Mbr_partition2.Part_status = 'f'
+	tmp.Mbr_partition3.Part_status = 'f'
+	tmp.Mbr_partition4.Part_status = 'f'
+
+	tmp.Mbr_partition1.Part_type = 'f'
+	tmp.Mbr_partition2.Part_type = 'f'
+	tmp.Mbr_partition3.Part_type = 'f'
+	tmp.Mbr_partition4.Part_type = 'f'
+
+	tmp.Mbr_partition1.Part_fit = 'v'
+	tmp.Mbr_partition2.Part_fit = 'v'
+	tmp.Mbr_partition3.Part_fit = 'v'
+	tmp.Mbr_partition4.Part_fit = 'v'
+}

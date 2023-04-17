@@ -59,7 +59,7 @@ func (tmp *Mkdisk) Execute() {
 	tmpT := []byte(t)
 	tmpS := uint32(rand.Intn(101))
 	mbr := structs.MBR{Mbr_tamano: uint32(tmp.Size), Mbr_fecha_creacion: [8]byte(tmpT), Mbr_dsk_signature: tmpS}
-
+	mbr.InitialPartitions()
 	file.Seek(0, 0)
 	err2 = binary.Write(file, binary.LittleEndian, &mbr)
 	if err2 != nil && !os.IsExist(err) {
