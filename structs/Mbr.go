@@ -19,6 +19,13 @@ type MBR struct {
 	Mbr_partition4     Partition
 }
 
+type EBR struct {
+	Part_status, Part_fit byte
+	Part_start, Part_size int32
+	Part_next             int32
+	Part_name             [16]byte
+}
+
 func (tmp *MBR) InitialPartitions() {
 	tmp.Mbr_partition1.Part_status = 'f'
 	tmp.Mbr_partition2.Part_status = 'f'

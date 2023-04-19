@@ -8,13 +8,13 @@ func main() {
 	var lexer commands.Lexer
 	//lexer.GeneralComand("mkdisk >Size=3000 >unit=K >path=/home/user/Disco1.dsk >fit=ff")
 
-	lexer.GeneralComand("fdisk >size=300 >path=/home/user/disco1.dsk >name=Particion1")
+	lexer.GeneralComand("fdisk >size=100 >type=l >unit=k >fit=bf >path=/home/user/disco1.dsk >name=\"Particion3\"")
 }
 
 /*
-fdisk >Size=300 >path=/home/user/Disco1.dsk >name=Particion1
+fdisk >size=300 >path=/home/user/disco1.dsk >name=Particion1
 var lexer commands.Lexer
-	//lexer.GeneralComand("mkdisk >Size=3000 >unit=K >path=/home/user/Disco1.dsk >fit=ff")
+	//lexer.GeneralComand("mkdisk >size=3000 >unit=K >path=/home/user/disco1.dsk >fit=ff")
 
 	for {
 		fmt.Println("Ingrese el comando deseado")

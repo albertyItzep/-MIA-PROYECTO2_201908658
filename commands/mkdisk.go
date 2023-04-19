@@ -58,7 +58,10 @@ func (tmp *Mkdisk) Execute() {
 	t := string(time.Now().Format("02012006"))
 	tmpT := []byte(t)
 	tmpS := uint32(rand.Intn(101))
-	mbr := structs.MBR{Mbr_tamano: uint32(tmp.Size), Mbr_fecha_creacion: [8]byte(tmpT), Mbr_dsk_signature: tmpS}
+	if tmp.Fit == 'o' {
+		tmp.Fit = 'f'
+	}
+	mbr := structs.MBR{Dsk_fit: tmp.Fit, Mbr_tamano: uint32(tmp.Size), Mbr_fecha_creacion: [8]byte(tmpT), Mbr_dsk_signature: tmpS}
 	mbr.InitialPartitions()
 	file.Seek(0, 0)
 	err2 = binary.Write(file, binary.LittleEndian, &mbr)

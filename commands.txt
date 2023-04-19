@@ -1,0 +1,15 @@
+----------------- mdisk -----------------
+mkdisk >size=3000 >unit=K >path=/home/user/disco1.dsk >fit=ff
+
+
+----------------- fdisk ----------------- 
+fdisk >size=300 >path=/home/user/disco1.dsk >name=Particion1
+fdisk >type=E >path=/home/user/disco1.dsk >dnit=K >name=Particion2 >size=300
+fdisk >size=1 >type=L >unit=M >fit=BF >path=/home/user/disco1.dsk >name="Particion3"
+fdisk >type=E >path=/home/user/disco1.dsk >name=Part3 >Unit=K >size=200
+----------------- mdisk -----------------
+----------------- mdisk -----------------
+----------------- mdisk -----------------
+----------------- mdisk -----------------
+----------------- mdisk -----------------
+----------------- mdisk -----------------

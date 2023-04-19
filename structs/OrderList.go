@@ -11,43 +11,28 @@ type NodeSpaces struct {
 	Previus             *NodeSpaces
 }
 type SpacesList struct {
-	Size int
-	Root *NodeSpaces
-	End  *NodeSpaces
+	Size, SpaceFill int
+	Root            *NodeSpaces
+	End             *NodeSpaces
 }
 
 func (list *SpacesList) InsertNode(inicio int, fin int, status byte) {
-	newNode := NodeSpaces{Inicio: inicio, Fin: fin, Status: status, Tamano: fin - inicio}
+	newNodo := NodeSpaces{Inicio: inicio, Fin: fin, Tamano: fin - inicio, Status: status}
+	list.SpaceFill += newNodo.Tamano
 	list.Size++
 	if list.Root == nil {
-		list.Root = &newNode
-		list.End = &newNode
-	} else if inicio < list.Root.Inicio {
-		newNode.Next = list.Root
-		list.Root.Previus = &newNode
-		list.Root = &newNode
-	} else if inicio > list.End.Inicio {
-		list.End.Next = &newNode
-		newNode.Previus = list.End
-		list.End = &newNode
+		list.Root = &newNodo
+		list.End = &newNodo
 	} else {
-		tmp2 := list.Root
-		x := 0
-		for x < list.Size && tmp2 != nil {
-			if inicio < tmp2.Inicio {
-				tmp2.Previus.Next = &newNode
-				newNode.Previus = tmp2.Previus
-				newNode.Next = tmp2
-				tmp2.Previus = &newNode
-				break
-			}
-			tmp2 = tmp2.Next
-		}
+		list.End.Next = &newNodo
+		newNodo.Previus = list.End
+		list.End = &newNodo
 	}
 }
 
 func (list *SpacesList) InsertForSize(Inicio int, fin int, tamano int, status byte) {
 	newNode := NodeSpaces{Inicio: Inicio, Fin: fin, Status: status, Tamano: tamano}
+	list.SpaceFill += newNode.Tamano
 	list.Size++
 	if list.Root == nil {
 		list.Root = &newNode
@@ -76,6 +61,11 @@ func (list *SpacesList) InsertForSize(Inicio int, fin int, tamano int, status by
 		}
 	}
 }
+
+func (list *SpacesList) ReturnOcupedSpace() int {
+	return list.SpaceFill
+}
+
 func (list *SpacesList) FillList(tamanoTotal int) {
 	tmp := list.Root
 	for tmp.Next != nil {
