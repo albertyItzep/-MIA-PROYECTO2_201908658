@@ -6,17 +6,10 @@ import (
 
 func main() {
 	var lexer commands.Lexer
-	//lexer.GeneralComand("mkdisk >Size=3000 >unit=K >path=/home/user/Disco1.dsk >fit=ff")
-
-	lexer.GeneralComand("fdisk >size=100 >type=l >unit=k >fit=bf >path=/home/user/disco1.dsk >name=\"Particion3\"")
+	lexer.GeneralComand("fdisk >size=100 >type=p >unit=k >fit=bf >path=/home/user/disco1.dsk >name=\"particion5\"")
 }
 
 /*
-fdisk >size=300 >path=/home/user/disco1.dsk >name=Particion1
-var lexer commands.Lexer
-	//lexer.GeneralComand("mkdisk >size=3000 >unit=K >path=/home/user/disco1.dsk >fit=ff")
-
-	for {
 		fmt.Println("Ingrese el comando deseado")
 		reader := bufio.NewReader(os.Stdin)
 		commandString, _ := reader.ReadString('\n')
@@ -26,6 +19,14 @@ var lexer commands.Lexer
 		fmt.Println(commandString)
 		if commandString == "exit" {
 			fmt.Println("Nos vemos Luego")
+			return
+		} else if commandString != "" {
+			lexer.GeneralComand(commandString)
+		} else if commandString == "" {
+			fmt.Println("Por Favor ingrese un comando la proxima vez")
+			return
+		}
+	}	fmt.Println("Nos vemos Luego")
 			return
 		} else if commandString != "" {
 			lexer.GeneralComand(commandString)

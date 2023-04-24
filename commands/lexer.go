@@ -78,9 +78,15 @@ func (tmp *Lexer) CommandFdisk() {
 	pathFdisk := tmp.PathParameter(true)
 	sizeFdisk := tmp.SizeParameter(true)
 	unitfdisk := tmp.UnitParameter(false)
-	fmt.Println(sizeFdisk)
 	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
 	fdisk.Execute()
+}
+
+/*The function execute the mount command*/
+func (tmp *Lexer) MountCommand() {
+	name := tmp.NameParameter(true)
+	pathFile := tmp.PathParameter(true)
+	fmt.Println(name, pathFile)
 }
 
 /*The parameter Name contain the name of partition*/

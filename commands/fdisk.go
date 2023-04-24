@@ -49,6 +49,7 @@ func (tmp *Fdisk) Execute() {
 	} else if tmp.Type == 'l' {
 		tmp.LogicPartition()
 	}
+	fmt.Println(tmp.MbrFdisk)
 }
 
 /*The function generate the asignation of a primary partition in the disk*/
@@ -120,9 +121,10 @@ func (fdisk *Fdisk) ExtendPartition() {
 		fmt.Println("estado de memoria apto")
 		fdisk.MemoryList.ShowList()
 		if isertDisc {
+			partitionTmp.Part_status = 'o'
 			partitionTmp.Part_type = 'e'
 			partitionTmp.Part_size = fdisk.Size
-
+			partitionTmp.Part_fit = fdisk.Fit
 			for i := 0; i < 16; i++ {
 				partitionTmp.Part_name[i] = fdisk.Name[i]
 				if i == len(fdisk.Name)-1 {
@@ -131,6 +133,7 @@ func (fdisk *Fdisk) ExtendPartition() {
 			}
 			if fdisk.MemoryList.ExistSpace(int(partitionTmp.Part_size)) {
 				if fdisk.MbrFdisk.Dsk_fit == 'f' || fdisk.MbrFdisk.Dsk_fit == 'o' {
+					fdisk.MbrFdisk.Dsk_fit = 'f'
 					partitionTmp.Part_start = uint32(fdisk.MemoryList.FirstSpace(int(partitionTmp.Part_size)))
 				} else if fdisk.MbrFdisk.Dsk_fit == 'b' {
 					partitionTmp.Part_start = uint32(fdisk.MemoryList.MinSpace(int(partitionTmp.Part_size)))
@@ -153,7 +156,7 @@ func (fdisk *Fdisk) ExtendPartition() {
 					log.Fatal(err2)
 				}
 				file2.Seek(int64(partitionTmp.Part_start), 0)
-				ebr0 := structs.EBR{Part_status: 'f', Part_start: -1, Part_size: -1}
+				ebr0 := structs.EBR{Part_status: 'f', Part_start: -1, Part_size: -1, Part_fit: fdisk.Fit}
 				err2 = binary.Write(file2, binary.LittleEndian, &ebr0)
 				if err2 != nil {
 					fmt.Println("Error en la escritura de la particion")
@@ -178,7 +181,6 @@ func (fdisk *Fdisk) LogicPartition() {
 	if fdisk.ExistExtendedPartition() {
 		extendedPartition := fdisk.ReturnExtendedPartition()
 		if extendedPartition != nil {
-
 			if extendedPartition.Part_size > fdisk.Size {
 				file, err := os.OpenFile(fdisk.Path, os.O_RDWR, 0644)
 				if err != nil {
@@ -211,11 +213,12 @@ func (fdisk *Fdisk) LogicPartition() {
 						fmt.Println("Error al escribir en el archivo")
 						log.Fatal(err)
 					}
+					fmt.Println("Inserto una en el primer espacio vacio")
 				} else {
 					listTmp := structs.SpacesList{}
-					for ebr.Part_next != -1 {
+					for ebr.Part_next != 0 {
 						listTmp.InsertNode(int(ebr.Part_start), int(ebr.Part_size+ebr.Part_start), 'o')
-						file.Seek(int64(ebr.Part_start), 0)
+						file.Seek(int64(ebr.Part_next), 0)
 						err = binary.Read(file, binary.LittleEndian, &ebr)
 						if err != nil {
 							fmt.Println("Error al leer el archivo")
@@ -227,7 +230,7 @@ func (fdisk *Fdisk) LogicPartition() {
 					listTmp.FillList(int(extendedPartition.Part_size))
 					var startLogicP, freeSpace int
 					freeSpace = int(extendedPartition.Part_size) - listTmp.SpaceFill
-					if freeSpace > int(extendedPartition.Part_size) {
+					if freeSpace > int(fdisk.Size) {
 						if extendedPartition.Part_fit == 'f' {
 							startLogicP = listTmp.FirstSpace(int(fdisk.Size))
 						} else if extendedPartition.Part_fit == 'b' {
@@ -253,7 +256,7 @@ func (fdisk *Fdisk) LogicPartition() {
 						if previusPart != -1 {
 							file.Seek(int64(previusPart), 0)
 							var tmp2 structs.EBR
-							err = binary.Read(file, binary.LittleEndian, &ebr)
+							err = binary.Read(file, binary.LittleEndian, &tmp2)
 							if err != nil {
 								fmt.Println("Error al leer el archivo")
 								log.Fatal(err)
@@ -265,7 +268,10 @@ func (fdisk *Fdisk) LogicPartition() {
 								fmt.Println("Error al escribir en el archivo")
 								log.Fatal(err)
 							}
+							fmt.Println("Escribio una logica mas")
 						}
+					} else {
+						fmt.Println("El espacio para la particion de momento no se encuentra disponible")
 					}
 				}
 			} else {
