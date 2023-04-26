@@ -5,10 +5,14 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/mia/proyecto2/structs"
 )
 
 type Lexer struct {
 	CommandString string
+	ListDisk      structs.DiskList
+	ListPartitio  structs.PartitionList
 }
 
 /* take a string and searched a command defined, execute a function for the command */
@@ -56,8 +60,10 @@ func (tmp *Lexer) CommandMkdir() {
 	fit := tmp.FitParameter(false)
 	unit := tmp.UnitParameter(false)
 	if pathMkdir != "" && size > 0 {
-		tmp := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
-		tmp.Execute()
+		tmpM := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
+		tmpM.Execute()
+		tmp.ListDisk.InsertNode(pathMkdir, size)
+		tmp.ListDisk.ShowDisk()
 	}
 }
 
@@ -80,6 +86,11 @@ func (tmp *Lexer) CommandFdisk() {
 	unitfdisk := tmp.UnitParameter(false)
 	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
 	fdisk.Execute()
+	existDisk := tmp.ListDisk.ExistFileFisic(pathFdisk)
+	sizeFdisk = fdisk.ReturnSize(sizeFdisk, unitfdisk)
+	tmp.ListDisk.InsertPartitionDisk(pathFdisk)
+	tmp.ListPartitio.InsertNode(pathFdisk, name, sizeFdisk, existDisk)
+	tmp.ListPartitio.ShowListPartition()
 }
 
 /*The function execute the mount command*/

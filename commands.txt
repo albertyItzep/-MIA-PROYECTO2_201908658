@@ -1,5 +1,8 @@
 ----------------- mdisk -----------------
 mkdisk >size=3000 >unit=K >path=/home/user/disco1.dsk >fit=ff
+mkdisk >path=/home/user/Disco2.dsk >Unit=K >size=3000
+mkdisk >size=5 >unit=M >path="/home/mis discos/Disco3.dsk"
+mkdisk >size=10 >path="/home/mis discos/Disco4.dsk"
 
 
 ----------------- fdisk ----------------- 

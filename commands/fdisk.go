@@ -227,7 +227,7 @@ func (fdisk *Fdisk) LogicPartition() {
 					}
 					listTmp.InsertNode(int(ebr.Part_start), int(ebr.Part_start+ebr.Part_size), 'o')
 					file.Seek(int64(extendedPartition.Part_start), 0)
-					listTmp.FillList(int(extendedPartition.Part_size))
+					listTmp.FillList(int(extendedPartition.Part_size + extendedPartition.Part_start))
 					var startLogicP, freeSpace int
 					freeSpace = int(extendedPartition.Part_size) - listTmp.SpaceFill
 					if freeSpace > int(fdisk.Size) {

@@ -1,8 +1,10 @@
 package structs
 
 import (
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -24,15 +26,14 @@ func (list *DiskList) InsertNode(pathFile string, diskSize int) {
 	pathFile = list.ReturnValueWithoutMarks(pathFile)
 	if !list.ExistDiscList(pathFile) && list.ExistFileFisic(pathFile) {
 		tmp := DiskNode{PathDisk: pathFile, DiskSize: diskSize}
+		list.Size++
 		if list.rootNode == nil {
 			list.rootNode = &tmp
 			list.endNode = &tmp
-			list.Size++
 		} else {
-			list.rootNode.nextNode = &tmp
+			list.endNode.nextNode = &tmp
 			tmp.previusNode = list.endNode
 			list.endNode = &tmp
-			list.Size++
 		}
 	}
 }
@@ -110,10 +111,20 @@ func (list *DiskList) ExistFileFisic(pathFile string) bool {
 	}
 	return true
 }
+
 func (tmp *DiskList) ReturnValueWithoutMarks(value string) string {
 	var tmpString string
 	remplaceString := regexp.MustCompile("\"")
 	tmpString = remplaceString.ReplaceAllString(value, "")
 	tmpString = strings.TrimSpace(tmpString)
 	return tmpString
+}
+
+func (list *DiskList) ShowDisk() {
+	tmp := list.rootNode
+	for i := 0; i < list.Size; i++ {
+		fmt.Println(i)
+		fmt.Println(tmp.PathDisk + ", " + strconv.Itoa(tmp.DiskSize))
+		tmp = tmp.nextNode
+	}
 }
