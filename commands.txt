@@ -7,12 +7,21 @@ mkdisk >size=10 >path="/home/mis discos/Disco4.dsk"
 
 ----------------- fdisk ----------------- 
 fdisk >size=300 >path=/home/user/disco1.dsk >name=Particion1
+fdisk >size=300 >path=/home/user/disco2.dsk >name=Particion1
 fdisk >type=E >path=/home/user/disco1.dsk >unit=K >name=Particion2 >size=300
+fdisk >type=E >path=/home/user/disco2.dsk >unit=K >name=Particion2 >size=300
+
 fdisk >size=100 >type=L >unit=k >fit=BF >path=/home/user/disco1.dsk >name="Particion3"
 fdisk >type=E >path=/home/user/disco1.dsk >name=Part3 >Unit=K >size=200
 ----------------- Mount -----------------
-mount >path=/home/Disco1.dsk >name=Part1
------------------ mdisk -----------------
+mount >path=/home/user/Disco1.dsk >name=Particion1
+mount >path=/home/user/Disco1.dsk >name=Particion2
+mount >path=/home/user/Disco2.dsk >name=Particion1
+mount >path=/home/user/Disco2.dsk >name=Particion2
+----------------- mkfs -----------------
+mkfs >type=full >id=581A
+mkfs >id=582A
+
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------

@@ -13,6 +13,7 @@ type Lexer struct {
 	CommandString string
 	ListDisk      structs.DiskList
 	ListPartitio  structs.PartitionList
+	ListMount     MountList
 }
 
 /* take a string and searched a command defined, execute a function for the command */
@@ -25,11 +26,9 @@ func (tmp *Lexer) GeneralComand(command string) {
 	} else if matched, _ := regexp.Match("(fdisk)(.*)", []byte(tmp.CommandString)); matched {
 		tmp.CommandFdisk()
 	} else if matched, _ := regexp.Match("(mount)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando mount")
-	} else if matched, _ := regexp.Match("(unmount)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando unmount")
+		tmp.CommandMount()
 	} else if matched, _ := regexp.Match("(mkfs)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando mkfs")
+		tmp.CommandMkfs()
 	} else if matched, _ := regexp.Match("(rep)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando rep")
 	} else if matched, _ := regexp.Match("(pause)(.*)", []byte(tmp.CommandString)); matched {
@@ -86,7 +85,13 @@ func (tmp *Lexer) CommandFdisk() {
 	unitfdisk := tmp.UnitParameter(false)
 	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
 	fdisk.Execute()
-	existDisk := tmp.ListDisk.ExistFileFisic(pathFdisk)
+	existDisk := tmp.ListDisk.ExistDiscList(pathFdisk)
+	if !existDisk {
+		if tmp.ListDisk.ExistFileFisic(pathFdisk) {
+			tmp.ListDisk.InsertNode(pathFdisk, tmp.ListDisk.ReturnFileSizeFisic(pathFdisk))
+		}
+	}
+	existDisk = tmp.ListDisk.ExistDiscList(pathFdisk)
 	sizeFdisk = fdisk.ReturnSize(sizeFdisk, unitfdisk)
 	tmp.ListDisk.InsertPartitionDisk(pathFdisk)
 	tmp.ListPartitio.InsertNode(pathFdisk, name, sizeFdisk, existDisk)
@@ -94,10 +99,28 @@ func (tmp *Lexer) CommandFdisk() {
 }
 
 /*The function execute the mount command*/
-func (tmp *Lexer) MountCommand() {
+func (tmp *Lexer) CommandMount() {
 	name := tmp.NameParameter(true)
 	pathFile := tmp.PathParameter(true)
-	fmt.Println(name, pathFile)
+	starPartition := tmp.ListPartitio.ReturnStartPartitionValue(pathFile, name)
+	tmp.ListDisk.InsertPartitionDiskMounted(pathFile)
+	numParition := tmp.ListDisk.ReturnPartitionsDiskMounted(pathFile)
+	idDisk := tmp.ListDisk.ReturnIdOfPartition(pathFile) + 1
+	sizePartition := tmp.ListPartitio.ReturnSizePartition(pathFile, name)
+
+	tmp.ListMount.InserMount(pathFile, name, starPartition, sizePartition, numParition, idDisk)
+	tmp.ListMount.ShowPartition()
+}
+
+/*The functio execute the mkfs command*/
+func (tmp *Lexer) CommandMkfs() {
+	id := tmp.IdParameter(true)
+	typePar := tmp.TypeMkfsParameter(false)
+
+	if id != "no" {
+		fmt.Println(id, typePar)
+
+	}
 }
 
 /*The parameter Name contain the name of partition*/
@@ -237,4 +260,36 @@ func (tmp *Lexer) UnitParameter(obligatory bool) byte {
 		unit = 'o'
 	}
 	return unit
+}
+
+/*The id parameter contain the information respect of the partition use*/
+func (tmp *Lexer) IdParameter(obligatory bool) string {
+	var text string
+	if matched, _ := regexp.Match(">id=", []byte(tmp.CommandString)); matched {
+		regexId := regexp.MustCompile(">id=[a-zA-Z0-9]+")
+		content := regexId.FindAllString(tmp.CommandString, -1)
+		text = content[0]
+		remplace := regexp.MustCompile(">id=")
+		text = remplace.ReplaceAllString(text, "")
+	} else if obligatory {
+		fmt.Println("El parametro id es obligatorio")
+		text = "no"
+	} else if !obligatory {
+		text = "no"
+	}
+	return text
+}
+
+/*The function contain the type of formating install in the partition*/
+func (tmp *Lexer) TypeMkfsParameter(obligatory bool) string {
+	var stringTmp string
+	if matched, _ := regexp.Match(">type=full", []byte(tmp.CommandString)); matched {
+		stringTmp = "full"
+	} else if obligatory {
+		fmt.Println("El parametro type es obligatorio")
+		stringTmp = "no"
+	} else if !obligatory {
+		stringTmp = "full"
+	}
+	return stringTmp
 }

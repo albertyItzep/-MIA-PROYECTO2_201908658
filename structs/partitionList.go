@@ -52,6 +52,7 @@ func (list *PartitionList) ReturnStartPartitionValue(pathFile string, name strin
 		if tmp.Name == name && tmp.PathFile == pathFile {
 			return tmp.StartPartition
 		}
+		tmp = tmp.NextNode
 	}
 	return -1
 }
@@ -65,6 +66,7 @@ func (list *PartitionList) ReturnSizePartition(pathFile string, name string) int
 		if tmp.Name == name && tmp.PathFile == pathFile {
 			return tmp.SizePartition
 		}
+		tmp = tmp.NextNode
 	}
 	return -1
 }
@@ -99,7 +101,7 @@ func (list *PartitionList) ReturnStartOfPartition(pathFile string, name string) 
 	namePartition := list.ReturnNameString(mbr.Mbr_partition1.Part_name)
 	if namePartition == name {
 		startPartition = int(mbr.Mbr_partition1.Part_start)
-	} else if mbr.Mbr_partition1.Part_type == 'e' && mbr.Mbr_partition1.Part_status == 'o' {
+	} else if mbr.Mbr_partition1.Part_type == 'e' && mbr.Mbr_partition1.Part_status == 'o' && namePartition != name {
 		isExtended = true
 		startExtendedPartition = int(mbr.Mbr_partition1.Part_start)
 	}
@@ -107,7 +109,7 @@ func (list *PartitionList) ReturnStartOfPartition(pathFile string, name string) 
 	namePartition = list.ReturnNameString(mbr.Mbr_partition2.Part_name)
 	if namePartition == name {
 		startPartition = int(mbr.Mbr_partition2.Part_start)
-	} else if mbr.Mbr_partition2.Part_type == 'e' && mbr.Mbr_partition2.Part_status == 'o' {
+	} else if mbr.Mbr_partition2.Part_type == 'e' && mbr.Mbr_partition2.Part_status == 'o' && namePartition != name {
 		isExtended = true
 		startExtendedPartition = int(mbr.Mbr_partition2.Part_start)
 	}
@@ -115,7 +117,7 @@ func (list *PartitionList) ReturnStartOfPartition(pathFile string, name string) 
 	namePartition = list.ReturnNameString(mbr.Mbr_partition3.Part_name)
 	if namePartition == name {
 		startPartition = int(mbr.Mbr_partition3.Part_start)
-	} else if mbr.Mbr_partition3.Part_type == 'e' && mbr.Mbr_partition3.Part_status == 'o' {
+	} else if mbr.Mbr_partition3.Part_type == 'e' && mbr.Mbr_partition3.Part_status == 'o' && namePartition != name {
 		isExtended = true
 		startExtendedPartition = int(mbr.Mbr_partition3.Part_start)
 	}
@@ -123,7 +125,7 @@ func (list *PartitionList) ReturnStartOfPartition(pathFile string, name string) 
 	namePartition = list.ReturnNameString(mbr.Mbr_partition4.Part_name)
 	if namePartition == name {
 		startPartition = int(mbr.Mbr_partition4.Part_start)
-	} else if mbr.Mbr_partition4.Part_type == 'e' && mbr.Mbr_partition4.Part_status == 'o' {
+	} else if mbr.Mbr_partition4.Part_type == 'e' && mbr.Mbr_partition4.Part_status == 'o' && namePartition != name {
 		isExtended = true
 		startExtendedPartition = int(mbr.Mbr_partition4.Part_start)
 	}

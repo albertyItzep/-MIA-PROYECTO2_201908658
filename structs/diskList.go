@@ -64,6 +64,17 @@ func (list *DiskList) InsertPartitionDiskMounted(pathFile string) {
 	}
 }
 
+/*The function return the size of fisic file*/
+func (list *DiskList) ReturnFileSizeFisic(pathFile string) int {
+	pathFile = list.ReturnValueWithoutMarks(pathFile)
+	fileIfo, err := os.Stat(pathFile)
+	if err != nil {
+		fmt.Println(err)
+		return -1
+	}
+	return int(fileIfo.Size())
+}
+
 /*the function return the cant of partitions in the disk*/
 func (list *DiskList) ReturnPartitionsDiskMounted(pathFile string) int {
 	pathFile = list.ReturnValueWithoutMarks(pathFile)
@@ -112,6 +123,18 @@ func (list *DiskList) ExistFileFisic(pathFile string) bool {
 	return true
 }
 
+/*he function return of id in where is the partition in the list*/
+func (list *DiskList) ReturnIdOfPartition(pathFile string) int {
+	pathFile = list.ReturnValueWithoutMarks(pathFile)
+	tmp := list.rootNode
+	for i := 0; i < list.Size; i++ {
+		if tmp.PathDisk == pathFile {
+			return i
+		}
+		tmp = tmp.nextNode
+	}
+	return -1
+}
 func (tmp *DiskList) ReturnValueWithoutMarks(value string) string {
 	var tmpString string
 	remplaceString := regexp.MustCompile("\"")
