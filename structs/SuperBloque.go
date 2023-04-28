@@ -30,11 +30,15 @@ type InodeTable struct {
 	I_type  byte
 	I_perm  int32
 }
-type FileBlock struct {
-	B_Content B_content
+type DirBlock struct {
+	B_Content [4]B_content
 }
 
 type B_content struct {
 	B_name  [12]byte
 	B_inodp int32
+}
+
+type FileBlock struct {
+	B_content [64]byte
 }

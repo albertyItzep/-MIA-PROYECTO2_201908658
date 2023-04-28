@@ -19,8 +19,8 @@ mount >path=/home/user/Disco1.dsk >name=Particion2
 mount >path=/home/user/Disco2.dsk >name=Particion1
 mount >path=/home/user/Disco2.dsk >name=Particion2
 ----------------- mkfs -----------------
-mkfs >type=full >id=581A
-mkfs >id=582A
+mkfs >type=full >id=581a
+mkfs >id=581b
 
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------

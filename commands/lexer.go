@@ -116,10 +116,13 @@ func (tmp *Lexer) CommandMount() {
 func (tmp *Lexer) CommandMkfs() {
 	id := tmp.IdParameter(true)
 	typePar := tmp.TypeMkfsParameter(false)
-
+	SizeOfPartition := tmp.ListMount.ReturnSizeWithId(id)
 	if id != "no" {
+		startPartition := tmp.ListMount.ReturnStartPartitionWithId(id)
+		pathFile := tmp.ListMount.ReturnPathitionWithId(id)
 		fmt.Println(id, typePar)
-
+		mkfs := Mkfs{IdMkfs: id, TypeMkfs: typePar, SizeOfPartition: SizeOfPartition, StartPartition: startPartition, PathFile: pathFile}
+		mkfs.Execute()
 	}
 }
 

@@ -44,6 +44,45 @@ func (list *MountList) InserMount(pathFile string, namePartition string, startpa
 	}
 }
 
+/*The function return the size of partition, need the id of partition*/
+func (list *MountList) ReturnSizeWithId(idPartition string) int {
+	idPartition = list.ReturnValueWithoutMarks(idPartition)
+	tmp := list.RootNode
+	for i := 0; i < list.Size; i++ {
+		if tmp.IdPartition == idPartition {
+			return tmp.SizeOfPartitio
+		}
+		tmp = tmp.NextNode
+	}
+	return -1
+}
+
+/*The function return the start of partition, need the id of partition*/
+func (list *MountList) ReturnStartPartitionWithId(idPartition string) int {
+	idPartition = list.ReturnValueWithoutMarks(idPartition)
+	tmp := list.RootNode
+	for i := 0; i < list.Size; i++ {
+		if tmp.IdPartition == idPartition {
+			return tmp.StartParticion
+		}
+		tmp = tmp.NextNode
+	}
+	return -1
+}
+
+/*The function return the path of disk where is the partition, need the id of partition*/
+func (list *MountList) ReturnPathitionWithId(idPartition string) string {
+	idPartition = list.ReturnValueWithoutMarks(idPartition)
+	tmp := list.RootNode
+	for i := 0; i < list.Size; i++ {
+		if tmp.IdPartition == idPartition {
+			return tmp.PathFile
+		}
+		tmp = tmp.NextNode
+	}
+	return ""
+}
+
 /*The metod return of the letter asigned of mounted*/
 func (list *MountList) ReturnLetterAsigned(numberPartition int) string {
 	letterArray := [27]string{"aa", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
