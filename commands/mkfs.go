@@ -130,7 +130,7 @@ func (mkfs *Mkfs) Execute() {
 	inode.I_block[0] = 0
 	inode.I_type = '0'
 	inode.I_perm = 664
-	for i := 1; i < 15; i++ {
+	for i := 1; i < 16; i++ {
 		inode.I_block[i] = -1
 	}
 	file.Seek(int64(superBlock.S_inode_start), 0)
@@ -170,7 +170,7 @@ func (mkfs *Mkfs) Execute() {
 	inode.I_block[0] = 1
 	inode.I_type = '1'
 	inode.I_perm = 755
-	for i := 1; i < 15; i++ {
+	for i := 1; i < 16; i++ {
 		inode.I_block[i] = -1
 	}
 	file.Seek(int64(superBlock.S_inode_start+int32(unsafe.Sizeof(structs.InodeTable{}))), 0)

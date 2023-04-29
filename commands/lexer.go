@@ -14,6 +14,7 @@ type Lexer struct {
 	ListDisk      structs.DiskList
 	ListPartitio  structs.PartitionList
 	ListMount     MountList
+	UserLoged     LoginUser
 }
 
 /* take a string and searched a command defined, execute a function for the command */
@@ -34,9 +35,9 @@ func (tmp *Lexer) GeneralComand(command string) {
 	} else if matched, _ := regexp.Match("(pause)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando pause")
 	} else if matched, _ := regexp.Match("(login)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando login")
+		tmp.CommandLogin()
 	} else if matched, _ := regexp.Match("(logout)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando Logout")
+		tmp.CommandLogout()
 	} else if matched, _ := regexp.Match("(mkgrp)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando mkgrp")
 	} else if matched, _ := regexp.Match("(rmgrp)(.*)", []byte(tmp.CommandString)); matched {
@@ -123,6 +124,42 @@ func (tmp *Lexer) CommandMkfs() {
 		fmt.Println(id, typePar)
 		mkfs := Mkfs{IdMkfs: id, TypeMkfs: typePar, SizeOfPartition: SizeOfPartition, StartPartition: startPartition, PathFile: pathFile}
 		mkfs.Execute()
+	}
+}
+
+/*The function execute the login command*/
+func (tmp *Lexer) CommandLogin() {
+	idPartition := tmp.IdParameter(true)
+	userLogin := tmp.UserParameter(true)
+	passLogin := tmp.PasswordParameter(true)
+	if idPartition != "no" && userLogin != "no" && passLogin != "" {
+		pathFile := "/home/user/disco1.dsk" //tmp.ListMount.ReturnPathitionWithId(idPartition)
+		startPartition := 133               //tmp.ListMount.ReturnStartPartitionWithId(idPartition)
+		tmp.UserLoged.IdPartition = idPartition
+		tmp.UserLoged.User = userLogin
+		tmp.UserLoged.Pwd = passLogin
+		tmp.UserLoged.StartPartition = startPartition
+		tmp.UserLoged.PathFile = pathFile
+		if tmp.UserLoged.LogedUser() {
+			fmt.Println("Sesion activa")
+		} else {
+			tmp.UserLoged.Execute()
+		}
+	}
+}
+
+/*The function execute the logout user*/
+func (tmp *Lexer) CommandLogout() {
+	if tmp.UserLoged.LogedUser() {
+		tmp.UserLoged.User = ""
+		tmp.UserLoged.IdPartition = ""
+		tmp.UserLoged.Pwd = ""
+		tmp.UserLoged.PathFile = ""
+		tmp.UserLoged.StartPartition = -1
+		tmp.UserLoged.Loged = false
+		fmt.Println("Logout Exitoso, nos vemos pronto!")
+	} else {
+		fmt.Println("No existe sesion activa")
 	}
 }
 
@@ -281,6 +318,56 @@ func (tmp *Lexer) IdParameter(obligatory bool) string {
 		text = "no"
 	}
 	return text
+}
+
+/*The function contain the password parameter*/
+func (tmp *Lexer) PasswordParameter(obligatory bool) string {
+	var tmpString string
+	passWithoutMarks := regexp.MustCompile(">pwd=[a-zA-Z0-9]+")
+	passWithMarks := regexp.MustCompile(">pwd=\"[a-zA-Z0-9[:space:]]+\"")
+	remplace := regexp.MustCompile(">pwd=")
+	if matched, _ := regexp.Match(">pwd=[a-zA-Z0-9]+", []byte(tmp.CommandString)); matched {
+		content := passWithoutMarks.FindAllString(tmp.CommandString, -1)
+		tmpString = content[0]
+		tmpString = remplace.ReplaceAllString(tmpString, "")
+	} else if matched1, _ := regexp.Match(">pwd=\"[a-zA-Z0-9[:space:]]+\"", []byte(tmp.CommandString)); matched1 {
+		content := passWithMarks.FindAllString(tmp.CommandString, -1)
+		tmpString = content[0]
+		tmpString = remplace.ReplaceAllString(tmpString, "")
+	} else if obligatory {
+		fmt.Println("El parametro id es obligatorio")
+		tmpString = "no"
+	} else if !obligatory {
+		tmpString = "no"
+	}
+	return tmpString
+}
+
+/*The funtion contain the user parameter*/
+func (tmp *Lexer) UserParameter(obligatory bool) string {
+	var tmpString string
+	if matched, _ := regexp.Match(">user=", []byte(tmp.CommandString)); matched {
+		regexUserWithoutMarks := regexp.MustCompile(">user=[a-zA-Z0-9]+")
+		regexUserWithMarks := regexp.MustCompile(">user=\"[a-zA-Z0-9[:space:]]+\"")
+		if matched1, _ := regexp.Match(">user=[a-zA-Z0-9]+", []byte(tmp.CommandString)); matched1 {
+			content := regexUserWithoutMarks.FindAllString(tmp.CommandString, -1)
+			tmpString = content[0]
+			remplace := regexp.MustCompile(">user=")
+			tmpString = remplace.ReplaceAllString(tmpString, "")
+		} else if matched1, _ := regexp.Match(">user=\"[a-zA-Z0-9[:space:]]+\"", []byte(tmp.CommandString)); matched1 {
+			content := regexUserWithMarks.FindAllString(tmp.CommandString, -1)
+			tmpString = content[0]
+			remplace := regexp.MustCompile(">user=")
+			tmpString = remplace.ReplaceAllString(tmpString, "")
+		}
+	} else if obligatory {
+		fmt.Println("El parametro id es obligatorio")
+		tmpString = "no"
+	} else if !obligatory {
+		tmpString = "no"
+	}
+
+	return tmpString
 }
 
 /*The function contain the type of formating install in the partition*/
