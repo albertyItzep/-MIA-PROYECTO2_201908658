@@ -20,7 +20,7 @@ type Fdisk struct {
 	MemoryList      structs.SpacesList
 }
 
-func (tmp *Fdisk) Execute() {
+func (tmp *Fdisk) Execute() string {
 	tmp.Name = tmp.ReturnValueWithoutMarks(tmp.Name)
 	tmp.Path = tmp.ReturnValueWithoutMarks(tmp.Path)
 	tmp.Size = uint32(tmp.ReturnSize(int(tmp.Size), tmp.Unit))
@@ -30,38 +30,35 @@ func (tmp *Fdisk) Execute() {
 	//Leemos el mbr del disco
 	file, err := os.Open(tmp.Path)
 	if err != nil {
-		fmt.Println("\033[31m[Error] > Al abrir el archivo:", err, "\033[0m")
-		return
+		return "\033[31m[Error] > Al abrir el archivo:" + "\033[0m"
 	}
 	file.Seek(0, 0)
 	err = binary.Read(file, binary.LittleEndian, &tmp.MbrFdisk)
 	if err != nil {
-		fmt.Println("\033[31m [Error] > Al leer el archivo:", err, "\033[0m")
-		return
+		return "\033[31m [Error] > Al leer el archivo" + "\033[0m"
+
 	}
 	file.Close()
 	//verificamos el tipo de particion a crear
 	if tmp.Type == 'p' || tmp.Type == 'o' {
 		fmt.Println(tmp.MbrFdisk)
-		tmp.PrimariPartition()
+		return tmp.PrimariPartition()
 	} else if tmp.Type == 'e' {
-		tmp.ExtendPartition()
+		return tmp.ExtendPartition()
 	} else if tmp.Type == 'l' {
-		tmp.LogicPartition()
+		return tmp.LogicPartition()
 	}
-	fmt.Println(tmp.MbrFdisk)
+	return "Error al crear la particion"
 }
 
 /*The function generate the asignation of a primary partition in the disk*/
-func (tmp *Fdisk) PrimariPartition() {
+func (tmp *Fdisk) PrimariPartition() string {
 	partitionTmp := tmp.FreePartition()
 	if partitionTmp == nil {
-		fmt.Println("No existe particion Libre")
-		return
+		return "No existe particion Libre"
 	}
 	//add of partition fit, type, name
 	isertDisc := tmp.StatusMemory()
-	fmt.Println("estado de memoria apto")
 	tmp.MemoryList.ShowList()
 	if isertDisc {
 		partitionTmp.Part_fit = tmp.Fit
@@ -86,39 +83,35 @@ func (tmp *Fdisk) PrimariPartition() {
 			//escribimos en el disco el mbr
 			file2, err := os.OpenFile(tmp.Path, os.O_RDWR, 0644)
 			if err != nil {
-				fmt.Println("\033[31m[Error] > Al abrir el archivo:", err, "\033[0m")
-				return
+				return "\033[31m[Error] > Al abrir el archivo:" + "\033[0m"
 			}
 			defer file2.Close()
 
 			file2.Seek(0, 0)
-			fmt.Println(unsafe.Sizeof(tmp.MbrFdisk))
 			err2 := binary.Write(file2, binary.LittleEndian, &tmp.MbrFdisk)
 			if err2 != nil && !os.IsExist(err) {
-				fmt.Println("aqui es")
 				log.Fatal(err2)
 			}
 			tmp.StatusMemory()
+			return "Particion creada exitosamente ..."
 		} else {
-			fmt.Println("El disco se encuentra fragmentado por ello no se encuentra el espacio disponible")
+			return "El disco se encuentra fragmentado por ello no se encuentra el espacio disponible"
 		}
 
 	} else {
-		fmt.Println("Todas las particiones se encuentran ocupadas")
+		return "Todas las particiones se encuentran ocupadas"
 	}
 }
 
 /*This function generate the asignatio of extend partition in the disk*/
-func (fdisk *Fdisk) ExtendPartition() {
+func (fdisk *Fdisk) ExtendPartition() string {
 	if !fdisk.ExistExtendedPartition() {
 		partitionTmp := fdisk.FreePartition()
 		if partitionTmp == nil {
-			fmt.Println("No existe particion Libre")
-			return
+			return "No existe particion Libre"
 		}
 		//add of partition fit, type, name
 		isertDisc := fdisk.StatusMemory()
-		fmt.Println("estado de memoria apto")
 		fdisk.MemoryList.ShowList()
 		if isertDisc {
 			partitionTmp.Part_status = 'o'
@@ -143,49 +136,44 @@ func (fdisk *Fdisk) ExtendPartition() {
 				//escribimos en el disco el mbr
 				file2, err := os.OpenFile(fdisk.Path, os.O_RDWR, 0644)
 				if err != nil {
-					fmt.Println("\033[31m[Error] > Al abrir el archivo:", err, "\033[0m")
-					return
+					return "\033[31m[Error] > Al abrir el archivo" + "\033[0m"
 				}
 				defer file2.Close()
 
 				file2.Seek(0, 0)
-				fmt.Println(unsafe.Sizeof(fdisk.MbrFdisk))
 				err2 := binary.Write(file2, binary.LittleEndian, &fdisk.MbrFdisk)
 				if err2 != nil && !os.IsExist(err) {
-					fmt.Println("Error en la escritura de la particion")
-					log.Fatal(err2)
+					return "Error en la escritura de la particion"
 				}
 				file2.Seek(int64(partitionTmp.Part_start), 0)
 				ebr0 := structs.EBR{Part_status: 'f', Part_start: -1, Part_size: -1, Part_fit: fdisk.Fit}
 				err2 = binary.Write(file2, binary.LittleEndian, &ebr0)
 				if err2 != nil {
-					fmt.Println("Error en la escritura de la particion")
-					log.Fatal(err2)
+					return "Error en la escritura de la particion"
 				}
-
 				fdisk.StatusMemory()
+				return "Particion creada con exito"
 			} else {
-				fmt.Println("El disco se encuentra fragmentado por ello no se encuentra el espacio disponible")
+				return "El disco se encuentra fragmentado por ello no se encuentra el espacio disponible"
 			}
 
 		} else {
-			fmt.Println("Todas las particiones se encuentran ocupadas")
+			return "Todas las particiones se encuentran ocupadas"
 		}
 	} else {
-		fmt.Println("Existe una particion Extendida en el disco")
+		return "Existe una particion Extendida en el disco"
 	}
 }
 
 /*This function asigned the logic partition in the disk*/
-func (fdisk *Fdisk) LogicPartition() {
+func (fdisk *Fdisk) LogicPartition() string {
 	if fdisk.ExistExtendedPartition() {
 		extendedPartition := fdisk.ReturnExtendedPartition()
 		if extendedPartition != nil {
 			if extendedPartition.Part_size > fdisk.Size {
 				file, err := os.OpenFile(fdisk.Path, os.O_RDWR, 0644)
 				if err != nil {
-					fmt.Println("Error al abrir el archivo")
-					log.Fatal(err)
+					return "\033[31m[Error] > Al abrir el archivo" + "\033[0m"
 				}
 				defer file.Close()
 				//read the initial ebr
@@ -193,8 +181,7 @@ func (fdisk *Fdisk) LogicPartition() {
 				file.Seek(int64(extendedPartition.Part_start), 0)
 				err = binary.Read(file, binary.LittleEndian, &ebr)
 				if err != nil {
-					fmt.Println("Error al abrir el archivo")
-					log.Fatal(err)
+					return "\033[31m[Error] > Al leer el archivo" + "\033[0m"
 				}
 				if ebr.Part_status == 'f' {
 					ebr.Part_status = 'o'
@@ -210,10 +197,9 @@ func (fdisk *Fdisk) LogicPartition() {
 					file.Seek(int64(extendedPartition.Part_start), 0)
 					err = binary.Write(file, binary.LittleEndian, &ebr)
 					if err != nil {
-						fmt.Println("Error al escribir en el archivo")
-						log.Fatal(err)
+						return "\033[31m[Error] > Al escribir el archivo" + "\033[0m"
 					}
-					fmt.Println("Inserto una en el primer espacio vacio")
+					return "Particion creada con exito ..."
 				} else {
 					listTmp := structs.SpacesList{}
 					for ebr.Part_next != 0 {
@@ -221,8 +207,7 @@ func (fdisk *Fdisk) LogicPartition() {
 						file.Seek(int64(ebr.Part_next), 0)
 						err = binary.Read(file, binary.LittleEndian, &ebr)
 						if err != nil {
-							fmt.Println("Error al leer el archivo")
-							log.Fatal(err)
+							return "\033[31m[Error] > Al leer el archivo" + "\033[0m"
 						}
 					}
 					listTmp.InsertNode(int(ebr.Part_start), int(ebr.Part_start+ebr.Part_size), 'o')
@@ -249,8 +234,7 @@ func (fdisk *Fdisk) LogicPartition() {
 						file.Seek(int64(tmp.Part_start), 0)
 						err = binary.Write(file, binary.LittleEndian, &tmp)
 						if err != nil {
-							fmt.Println("Error al escribir en el archivo")
-							log.Fatal(err)
+							return "\033[31m[Error] > Al escribir el archivo" + "\033[0m"
 						}
 						previusPart := listTmp.PreviusSpace(startLogicP)
 						if previusPart != -1 {
@@ -258,39 +242,36 @@ func (fdisk *Fdisk) LogicPartition() {
 							var tmp2 structs.EBR
 							err = binary.Read(file, binary.LittleEndian, &tmp2)
 							if err != nil {
-								fmt.Println("Error al leer el archivo")
-								log.Fatal(err)
+								return "\033[31m[Error] > Al leer el archivo" + "\033[0m"
 							}
 							tmp2.Part_next = int32(startLogicP)
 							file.Seek(int64(tmp2.Part_start), 0)
 							err = binary.Write(file, binary.LittleEndian, &tmp2)
 							if err != nil {
-								fmt.Println("Error al escribir en el archivo")
-								log.Fatal(err)
+								return "\033[31m[Error] > Al leer el archivo" + "\033[0m"
 							}
-							fmt.Println("Escribio una logica mas")
 						}
+						return "Particion creada con exito ..."
 					} else {
-						fmt.Println("El espacio para la particion de momento no se encuentra disponible")
+						return "El espacio para la particion de momento no se encuentra disponible"
 					}
 				}
 			} else {
-				fmt.Println("Espacio insuficiente")
+				return "Espacio insuficiente"
 			}
 
 		} else {
-			fmt.Println("No se encontro la particion Extendida")
+			return "No se encontro la particion Extendida"
 		}
 	} else {
-		fmt.Println("No existe particion Extendida")
+		return "No existe particion Extendida"
 	}
-
+	return "Error al crear la particion Logica"
 }
 
 /*The function verify the status of dispotition of memory*/
 func (fdiskTmp *Fdisk) StatusMemory() bool {
 	cantPartCreated := 0
-	fmt.Println(cantPartCreated)
 	fdiskTmp.MemoryList.ClearList()
 	sizeMBR := unsafe.Sizeof(structs.MBR{})
 	fdiskTmp.MemoryList.InsertNode(0, int(sizeMBR), 'o')

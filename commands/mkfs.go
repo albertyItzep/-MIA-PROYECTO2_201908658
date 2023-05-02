@@ -3,13 +3,14 @@ package commands
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/mia/proyecto2/structs"
 	"math"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 	"unsafe"
+
+	"github.com/mia/proyecto2/structs"
 )
 
 type Mkfs struct {
@@ -23,13 +24,12 @@ func (mkfs *Mkfs) Execute() {
 	mkfs.PathFile = mkfs.ReturnValueWithoutMarks(mkfs.PathFile)
 
 	superBlock := structs.SuperBlock{}
-	block := structs.FileBlock{}
 	inode := structs.InodeTable{}
 
 	//calculamos el numero total de inodos para la particion
 	var n, div float64
 	n = float64(mkfs.SizeOfPartition - int(unsafe.Sizeof(superBlock)))
-	div = 4 + float64(unsafe.Sizeof(inode)) + 3*float64(unsafe.Sizeof(block))
+	div = 4 + float64(unsafe.Sizeof(inode)) + 3*float64(unsafe.Sizeof(structs.FileBlock{}))
 	n = n / div
 	n = math.Floor(n)
 
@@ -189,9 +189,6 @@ func (mkfs *Mkfs) Execute() {
 		fmt.Println("\033[31m[Error] > Error al escribir un inodo:", err, "\033[0m")
 		return
 	}
-	fmt.Println("Formating Ext2")
-	fmt.Println("...")
-	fmt.Println("Formato exitoso")
 }
 func (tmp *Mkfs) ReturnValueWithoutMarks(value string) string {
 	var tmpString string

@@ -1,0 +1,17 @@
+1 - mkfile  ok
+2 - fdisk   ok
+3 - mount   ok
+4 - mkfs    ok
+5 - mkuser
+6 - rmuser
+7 - mkgrp
+8 - rmgrp
+9 - mkfile
+10 - mkdir
+
+rep disk
+rep ebr
+
+
+ec2
+front 

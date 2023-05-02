@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/binary"
-	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -18,12 +17,11 @@ type LoginUser struct {
 	Loged                 bool
 }
 
-func (login *LoginUser) Execute() {
+func (login *LoginUser) Execute() string {
 	login.PathFile = login.ReturnValueWithoutMarks(login.PathFile)
 	file, err := os.OpenFile(login.PathFile, os.O_RDWR, 0644)
 	if err != nil {
-		fmt.Println("\033[31m[Error] > Al abrir el archivo:", err, "\033[0m")
-		return
+		return "\033[31m[Error] > Al abrir el archivo " + "\033[0m"
 	}
 	defer file.Close()
 
@@ -32,16 +30,14 @@ func (login *LoginUser) Execute() {
 	file.Seek(int64(login.StartPartition), 0)
 	err = binary.Read(file, binary.LittleEndian, &superBloc)
 	if err != nil {
-		fmt.Println("\033[31m[Error] > Al leer un superBloc en el archivo:", err, "\033[0m")
-		return
+		return "\033[31m[Error] > Al leer un superBloc en el archivo " + "\033[0m"
 	}
 	//realizamos la lectura de el inodo user
 	inodeA := structs.InodeTable{}
 	file.Seek(int64(superBloc.S_inode_start+int32(unsafe.Sizeof(structs.InodeTable{}))), 0)
 	err = binary.Read(file, binary.LittleEndian, &inodeA)
 	if err != nil {
-		fmt.Println("\033[31m[Error] > Al leer un Inode en el archivo:", err, "\033[0m")
-		return
+		return "\033[31m[Error] > Al leer un Inode en el archivo " + "\033[0m"
 	}
 	//vamos a realizar la lectura de los bloques
 	tmpString := ""
@@ -52,8 +48,7 @@ func (login *LoginUser) Execute() {
 			file.Seek(int64(pos), 0)
 			err = binary.Read(file, binary.LittleEndian, &blockFile)
 			if err != nil {
-				fmt.Println("\033[31m[Error] > Al leer un blockFile en el archivo:", err, "\033[0m")
-				return
+				return "\033[31m[Error] > Al leer un blockFile en el archivo" + "\033[0m"
 			}
 			tmp1 := string(blockFile.B_content[:])
 			tmpString += tmp1
@@ -61,24 +56,20 @@ func (login *LoginUser) Execute() {
 	}
 	//procesamos la informacion del archivo
 	res1 := strings.Split(tmpString, "\n")
-	fmt.Println(res1)
 	for i := 0; i < len(res1); i++ {
 		res2 := strings.Split(res1[i], ",")
-		fmt.Println(len(res2))
 		if len(res2) > 2 && res2[1] == "U" {
 			if res2[3] == login.User {
 				if res2[4] == login.Pwd {
 					login.Loged = true
-					fmt.Println("Bienvenido usuario " + login.User + " Sesion Iniciada con exito")
-					return
+					return "ok"
 				} else {
-					fmt.Println("Pasword incorrecta")
-					return
+					return "pi"
 				}
 			}
 		}
 	}
-	fmt.Println("Usuario Inexistente")
+	return "ui"
 }
 
 /*The function return if th user is loged*/

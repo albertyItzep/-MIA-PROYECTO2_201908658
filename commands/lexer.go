@@ -18,28 +18,28 @@ type Lexer struct {
 }
 
 /* take a string and searched a command defined, execute a function for the command */
-func (tmp *Lexer) GeneralComand(command string) {
+func (tmp *Lexer) GeneralComand(command string) string {
 	tmp.CommandString = command
 	if matched, _ := regexp.Match("(mkdisk)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandMkdir()
+		return tmp.CommandMkdisk()
 	} else if matched, _ := regexp.Match("(rmdisk)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandRmdisk()
+		return tmp.CommandRmdisk()
 	} else if matched, _ := regexp.Match("(fdisk)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandFdisk()
+		return tmp.CommandFdisk()
 	} else if matched, _ := regexp.Match("(mount)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandMount()
+		return tmp.CommandMount()
 	} else if matched, _ := regexp.Match("(mkfs)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandMkfs()
+		return tmp.CommandMkfs()
 	} else if matched, _ := regexp.Match("(rep)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando rep")
 	} else if matched, _ := regexp.Match("(pause)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando pause")
 	} else if matched, _ := regexp.Match("(login)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandLogin()
+		return tmp.CommandLogin()
 	} else if matched, _ := regexp.Match("(logout)(.*)", []byte(tmp.CommandString)); matched {
-		tmp.CommandLogout()
+		return tmp.CommandLogout()
 	} else if matched, _ := regexp.Match("(mkgrp)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando mkgrp")
+		tmp.CommandMkgrp()
 	} else if matched, _ := regexp.Match("(rmgrp)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando rmgrp")
 	} else if matched, _ := regexp.Match("(mkuser)(.*)", []byte(tmp.CommandString)); matched {
@@ -51,10 +51,11 @@ func (tmp *Lexer) GeneralComand(command string) {
 	} else if matched, _ := regexp.Match("(mkdir)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando mkdir")
 	}
+	return "Error"
 }
 
 /* This method is used for make file of types binaries, with the structure implemented*/
-func (tmp *Lexer) CommandMkdir() {
+func (tmp *Lexer) CommandMkdisk() string {
 	pathMkdir := tmp.PathParameter(true)
 	size := tmp.SizeParameter(true)
 	fit := tmp.FitParameter(false)
@@ -63,21 +64,24 @@ func (tmp *Lexer) CommandMkdir() {
 		tmpM := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
 		tmpM.Execute()
 		tmp.ListDisk.InsertNode(pathMkdir, size)
-		tmp.ListDisk.ShowDisk()
+		return "Disco creado exitosamente ..."
 	}
+	return "Error en Mkdisk"
 }
 
 /*This method is used for delete file binari*/
-func (tmp *Lexer) CommandRmdisk() {
+func (tmp *Lexer) CommandRmdisk() string {
 	path := tmp.PathParameter(true)
 	if path != "" {
 		rmdisk := Rmdisk{Path: path}
 		rmdisk.Execute()
+		return "Disco eliminado exitosamente ..."
 	}
+	return "Error al elimiar el disco"
 }
 
 /*This method is used for modifi ofs patrtitions*/
-func (tmp *Lexer) CommandFdisk() {
+func (tmp *Lexer) CommandFdisk() string {
 	name := tmp.NameParameter(true)
 	fit := tmp.FitParameter(false)
 	typeFdisk := tmp.TypeParameter(false)
@@ -85,7 +89,7 @@ func (tmp *Lexer) CommandFdisk() {
 	sizeFdisk := tmp.SizeParameter(true)
 	unitfdisk := tmp.UnitParameter(false)
 	fdisk := Fdisk{Name: name, Path: pathFdisk, Fit: fit, Type: typeFdisk, Size: uint32(sizeFdisk), Unit: unitfdisk}
-	fdisk.Execute()
+	estatusR := fdisk.Execute()
 	existDisk := tmp.ListDisk.ExistDiscList(pathFdisk)
 	if !existDisk {
 		if tmp.ListDisk.ExistFileFisic(pathFdisk) {
@@ -96,11 +100,11 @@ func (tmp *Lexer) CommandFdisk() {
 	sizeFdisk = fdisk.ReturnSize(sizeFdisk, unitfdisk)
 	tmp.ListDisk.InsertPartitionDisk(pathFdisk)
 	tmp.ListPartitio.InsertNode(pathFdisk, name, sizeFdisk, existDisk)
-	tmp.ListPartitio.ShowListPartition()
+	return estatusR
 }
 
 /*The function execute the mount command*/
-func (tmp *Lexer) CommandMount() {
+func (tmp *Lexer) CommandMount() string {
 	name := tmp.NameParameter(true)
 	pathFile := tmp.PathParameter(true)
 	starPartition := tmp.ListPartitio.ReturnStartPartitionValue(pathFile, name)
@@ -111,45 +115,48 @@ func (tmp *Lexer) CommandMount() {
 
 	tmp.ListMount.InserMount(pathFile, name, starPartition, sizePartition, numParition, idDisk)
 	tmp.ListMount.ShowPartition()
+	return "particion montada con exito ..."
 }
 
 /*The functio execute the mkfs command*/
-func (tmp *Lexer) CommandMkfs() {
+func (tmp *Lexer) CommandMkfs() string {
 	id := tmp.IdParameter(true)
 	typePar := tmp.TypeMkfsParameter(false)
 	SizeOfPartition := tmp.ListMount.ReturnSizeWithId(id)
 	if id != "no" {
 		startPartition := tmp.ListMount.ReturnStartPartitionWithId(id)
 		pathFile := tmp.ListMount.ReturnPathitionWithId(id)
-		fmt.Println(id, typePar)
 		mkfs := Mkfs{IdMkfs: id, TypeMkfs: typePar, SizeOfPartition: SizeOfPartition, StartPartition: startPartition, PathFile: pathFile}
 		mkfs.Execute()
+		return "Formateo realizado con exito ..."
 	}
+	return "Error al generar el formateo"
 }
 
 /*The function execute the login command*/
-func (tmp *Lexer) CommandLogin() {
+func (tmp *Lexer) CommandLogin() string {
 	idPartition := tmp.IdParameter(true)
 	userLogin := tmp.UserParameter(true)
 	passLogin := tmp.PasswordParameter(true)
 	if idPartition != "no" && userLogin != "no" && passLogin != "" {
-		pathFile := "/home/user/disco1.dsk" //tmp.ListMount.ReturnPathitionWithId(idPartition)
-		startPartition := 133               //tmp.ListMount.ReturnStartPartitionWithId(idPartition)
+		pathFile := tmp.ListMount.ReturnPathitionWithId(idPartition)
+		startPartition := tmp.ListMount.ReturnStartPartitionWithId(idPartition)
 		tmp.UserLoged.IdPartition = idPartition
 		tmp.UserLoged.User = userLogin
 		tmp.UserLoged.Pwd = passLogin
 		tmp.UserLoged.StartPartition = startPartition
 		tmp.UserLoged.PathFile = pathFile
 		if tmp.UserLoged.LogedUser() {
-			fmt.Println("Sesion activa")
+			return "SA"
 		} else {
-			tmp.UserLoged.Execute()
+			return tmp.UserLoged.Execute()
 		}
 	}
+	return "EL"
 }
 
 /*The function execute the logout user*/
-func (tmp *Lexer) CommandLogout() {
+func (tmp *Lexer) CommandLogout() string {
 	if tmp.UserLoged.LogedUser() {
 		tmp.UserLoged.User = ""
 		tmp.UserLoged.IdPartition = ""
@@ -157,9 +164,27 @@ func (tmp *Lexer) CommandLogout() {
 		tmp.UserLoged.PathFile = ""
 		tmp.UserLoged.StartPartition = -1
 		tmp.UserLoged.Loged = false
-		fmt.Println("Logout Exitoso, nos vemos pronto!")
+		return "Nos vemos pronto"
 	} else {
 		fmt.Println("No existe sesion activa")
+	}
+	return "EL"
+}
+
+/*The function execute the make a grup command*/
+func (tmp *Lexer) CommandMkgrp() {
+	if tmp.UserLoged.LogedUser() {
+		if tmp.UserLoged.User == "root" {
+			nameGrup := tmp.NameMkgrupParameter(true)
+			pathFile := tmp.UserLoged.PathFile
+			startPartition := tmp.UserLoged.StartPartition
+			mkgrp := Mkgrp{NameGrup: nameGrup, PathFile: pathFile, StartParition: startPartition}
+			mkgrp.Execute()
+		} else {
+			fmt.Println("Permisos no validos, utilice usuario root")
+		}
+	} else {
+		fmt.Println("Sesion invalida")
 	}
 }
 
@@ -168,6 +193,25 @@ func (tmp *Lexer) NameParameter(obligatory bool) string {
 	cadena := ""
 	if matched, _ := regexp.Match(">name=[\"?[a-zA-Z0-9\\_]+\"?", []byte(tmp.CommandString)); matched {
 		regeName := regexp.MustCompile(">name=[\"?[a-zA-Z0-9\\_]+\"?")
+		content := regeName.FindAllString(tmp.CommandString, -1)
+		if len(content) > 0 {
+			cadena = content[0]
+			cadena = strings.Trim(cadena, ">name=")
+		}
+	} else if obligatory {
+		fmt.Println("El parametro size es obligatorio")
+		cadena = ""
+	} else {
+		cadena = ""
+	}
+	return cadena
+}
+
+/*The parameter contain the name of the grup*/
+func (tmp *Lexer) NameMkgrupParameter(obligatory bool) string {
+	cadena := ""
+	if matched, _ := regexp.Match(">name=[\"?[a-zA-Z0-9\\_[:space:]]+\"?", []byte(tmp.CommandString)); matched {
+		regeName := regexp.MustCompile(">name=[\"?[a-zA-Z0-9\\_[:space:]]+\"?")
 		content := regeName.FindAllString(tmp.CommandString, -1)
 		if len(content) > 0 {
 			cadena = content[0]
