@@ -142,7 +142,7 @@ func (list *PartitionList) ReturnStartOfPartition(pathFile string, name string) 
 		if namePartition == name {
 			startPartition = int(ebr.Part_start)
 		} else {
-			for ebr.Part_size != -1 {
+			for ebr.Part_next != 0 {
 				file.Seek(int64(ebr.Part_next), 0)
 				err = binary.Read(file, binary.LittleEndian, &ebr)
 				if err != nil {

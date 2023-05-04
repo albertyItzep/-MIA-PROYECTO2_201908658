@@ -31,7 +31,7 @@ func (tmp *Lexer) GeneralComand(command string) string {
 	} else if matched, _ := regexp.Match("(mkfs)(.*)", []byte(tmp.CommandString)); matched {
 		return tmp.CommandMkfs()
 	} else if matched, _ := regexp.Match("(rep)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando rep")
+		return tmp.CommandRep()
 	} else if matched, _ := regexp.Match("(pause)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando pause")
 	} else if matched, _ := regexp.Match("(login)(.*)", []byte(tmp.CommandString)); matched {
@@ -63,6 +63,7 @@ func (tmp *Lexer) CommandMkdisk() string {
 	if pathMkdir != "" && size > 0 {
 		tmpM := Mkdisk{Path: pathMkdir, Fit: fit, Unit: unit, Size: size}
 		tmpM.Execute()
+		size = tmpM.ReturnSize(size, unit)
 		tmp.ListDisk.InsertNode(pathMkdir, size)
 		return "Disco creado exitosamente ..."
 	}
@@ -74,8 +75,7 @@ func (tmp *Lexer) CommandRmdisk() string {
 	path := tmp.PathParameter(true)
 	if path != "" {
 		rmdisk := Rmdisk{Path: path}
-		rmdisk.Execute()
-		return "Disco eliminado exitosamente ..."
+		return rmdisk.Execute()
 	}
 	return "Error al elimiar el disco"
 }
@@ -96,10 +96,12 @@ func (tmp *Lexer) CommandFdisk() string {
 			tmp.ListDisk.InsertNode(pathFdisk, tmp.ListDisk.ReturnFileSizeFisic(pathFdisk))
 		}
 	}
-	existDisk = tmp.ListDisk.ExistDiscList(pathFdisk)
-	sizeFdisk = fdisk.ReturnSize(sizeFdisk, unitfdisk)
-	tmp.ListDisk.InsertPartitionDisk(pathFdisk)
-	tmp.ListPartitio.InsertNode(pathFdisk, name, sizeFdisk, existDisk)
+	if estatusR == "Particion creada exitosamente ..." {
+		existDisk = tmp.ListDisk.ExistDiscList(pathFdisk)
+		sizeFdisk = fdisk.ReturnSize(sizeFdisk, unitfdisk)
+		tmp.ListDisk.InsertPartitionDisk(pathFdisk)
+		tmp.ListPartitio.InsertNode(pathFdisk, name, sizeFdisk, existDisk)
+	}
 	return estatusR
 }
 
@@ -114,7 +116,6 @@ func (tmp *Lexer) CommandMount() string {
 	sizePartition := tmp.ListPartitio.ReturnSizePartition(pathFile, name)
 
 	tmp.ListMount.InserMount(pathFile, name, starPartition, sizePartition, numParition, idDisk)
-	tmp.ListMount.ShowPartition()
 	return "particion montada con exito ..."
 }
 
@@ -168,7 +169,7 @@ func (tmp *Lexer) CommandLogout() string {
 	} else {
 		fmt.Println("No existe sesion activa")
 	}
-	return "EL"
+	return "No existe Secion Activa"
 }
 
 /*The function execute the make a grup command*/
@@ -188,6 +189,24 @@ func (tmp *Lexer) CommandMkgrp() {
 	}
 }
 
+/*The function create the code for reports*/
+func (tmp *Lexer) CommandRep() string {
+	if tmp.UserLoged.LogedUser() {
+		fmt.Println("hello")
+		nameRep := tmp.NameParameter(true)
+		pathRep := tmp.PathParameter(true)
+		idRep := tmp.IdParameter(true)
+		pathRepFile := tmp.PathParameter(false)
+		PathDisk := tmp.ListMount.ReturnPathitionWithId(idRep)
+		startPartition := tmp.ListMount.ReturnStartPartitionWithId(idRep)
+		sizeDisk := tmp.ListDisk.ReturSizeDisk(PathDisk)
+		fmt.Println(nameRep)
+		rep := Report{NameReport: nameRep, PathRep: pathRep, idPartition: idRep, PathRepFile: pathRepFile, PathDisk: PathDisk, SizeDisk: sizeDisk, StartParition: startPartition}
+		return rep.Execute()
+	}
+	return "No Login"
+}
+
 /*The parameter Name contain the name of partition*/
 func (tmp *Lexer) NameParameter(obligatory bool) string {
 	cadena := ""
@@ -196,7 +215,8 @@ func (tmp *Lexer) NameParameter(obligatory bool) string {
 		content := regeName.FindAllString(tmp.CommandString, -1)
 		if len(content) > 0 {
 			cadena = content[0]
-			cadena = strings.Trim(cadena, ">name=")
+			remplace := regexp.MustCompile(">name=")
+			cadena = remplace.ReplaceAllString(cadena, "")
 		}
 	} else if obligatory {
 		fmt.Println("El parametro size es obligatorio")

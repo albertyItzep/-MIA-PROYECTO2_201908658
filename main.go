@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -70,8 +71,28 @@ func main() {
 	}).Methods("POST")
 
 	router.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		lexer.GeneralComand("logout")
+		respuestas := lexer.GeneralComand("logout")
+		res := struct{ Message string }{Message: respuestas}
+		json.NewEncoder(w).Encode(res)
 	}).Methods("GET")
+
+	router.HandleFunc("/individualComand", func(w http.ResponseWriter, r *http.Request) {
+		var comM CmdComand
+		err := json.NewDecoder(r.Body).Decode(&comM)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		comM.Cmd = strings.TrimSpace(comM.Cmd)
+		comM.Cmd = strings.ToLower(comM.Cmd)
+		mess := lexer.GeneralComand(comM.Cmd)
+		typeC := "command"
+		if matched, _ := regexp.Match("(rep)(.*)", []byte(comM.Cmd)); matched {
+			typeC = "rep"
+		}
+		res := struct{ Message, typeC string }{Message: mess, typeC: typeC}
+		json.NewEncoder(w).Encode(res)
+	}).Methods("POST")
 
 	fmt.Println("Servidor activo")
 	log.Fatal(http.ListenAndServe(":8000", router))

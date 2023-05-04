@@ -25,7 +25,7 @@ func (mkfs *Mkfs) Execute() {
 
 	superBlock := structs.SuperBlock{}
 	inode := structs.InodeTable{}
-
+	fmt.Println(unsafe.Sizeof(structs.FileBlock{}), unsafe.Sizeof(inode))
 	//calculamos el numero total de inodos para la particion
 	var n, div float64
 	n = float64(mkfs.SizeOfPartition - int(unsafe.Sizeof(superBlock)))
@@ -45,15 +45,15 @@ func (mkfs *Mkfs) Execute() {
 	superBlock.S_inode_size = int32(unsafe.Sizeof(structs.InodeTable{}))
 	superBlock.S_block_size = int32(unsafe.Sizeof(structs.FileBlock{}))
 
-	startBitmapInodes := mkfs.StartPartition + int(unsafe.Sizeof(structs.SuperBlock{}))
-	startBitmapBloks := startBitmapInodes + int(n)
+	startBitmapInodes := mkfs.StartPartition + int(unsafe.Sizeof(structs.SuperBlock{})) + 1
+	startBitmapBloks := startBitmapInodes + int(n) + 1
 	superBlock.S_bm_inode_start = int32(startBitmapInodes)
 	superBlock.S_bm_block_start = int32(startBitmapBloks)
 
-	firstInodeFree := startBitmapBloks + int(3*n)
-	firstBlockFree := firstInodeFree + int(n)*int(unsafe.Sizeof(structs.SuperBlock{}))
+	firstInodeFree := startBitmapBloks + int(3*n) + 1
+	firstBlockFree := firstInodeFree + int(n)*int(unsafe.Sizeof(structs.InodeTable{})) + 1
 	superBlock.S_firts_ino = int32(2)
-	superBlock.S_firts_ino = int32(2)
+	superBlock.S_first_blo = int32(2)
 
 	superBlock.S_inode_start = int32(firstInodeFree)
 	superBlock.S_block_start = int32(firstBlockFree)

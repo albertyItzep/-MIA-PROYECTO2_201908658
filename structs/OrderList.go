@@ -6,7 +6,7 @@ import (
 
 type NodeSpaces struct {
 	Inicio, Fin, Tamano int
-	Status              byte
+	Status, TypeP       byte
 	Next                *NodeSpaces
 	Previus             *NodeSpaces
 }
@@ -18,6 +18,20 @@ type SpacesList struct {
 
 func (list *SpacesList) InsertNode(inicio int, fin int, status byte) {
 	newNodo := NodeSpaces{Inicio: inicio, Fin: fin, Tamano: fin - inicio, Status: status}
+	list.SpaceFill += newNodo.Tamano
+	list.Size++
+	if list.Root == nil {
+		list.Root = &newNodo
+		list.End = &newNodo
+	} else {
+		list.End.Next = &newNodo
+		newNodo.Previus = list.End
+		list.End = &newNodo
+	}
+}
+
+func (list *SpacesList) InsertNodeRep(inicio int, fin int, tamano int, status byte, typeP byte) {
+	newNodo := NodeSpaces{Inicio: inicio, Fin: fin, Tamano: fin - inicio, Status: status, TypeP: typeP}
 	list.SpaceFill += newNodo.Tamano
 	list.Size++
 	if list.Root == nil {
@@ -62,6 +76,27 @@ func (list *SpacesList) InsertForSize(Inicio int, fin int, tamano int, status by
 	}
 }
 
+func (list *SpacesList) ReturnTypeIndex(indeex int) byte {
+	tmp := list.Root
+	for i := 0; i < list.Size; i++ {
+		if indeex == i {
+			return tmp.TypeP
+		}
+		tmp = tmp.Next
+	}
+	return 'i'
+}
+func (list *SpacesList) ReturnSizeIndex(indeex int) int {
+	tmp := list.Root
+	for i := 0; i < list.Size; i++ {
+		if indeex == i {
+			return tmp.Tamano
+		}
+		tmp = tmp.Next
+	}
+	return -1
+}
+
 func (list *SpacesList) ReturnOcupedSpace() int {
 	return list.SpaceFill
 }
@@ -73,7 +108,7 @@ func (list *SpacesList) FillList(tamanoTotal int) {
 		if distance >= 3 {
 			startP := tmp.Fin + 1
 			endP := tmp.Next.Inicio - 1
-			tmp2 := NodeSpaces{Inicio: startP, Fin: endP, Status: 'f', Tamano: endP - startP}
+			tmp2 := NodeSpaces{Inicio: startP, Fin: endP, Status: 'f', Tamano: endP - startP, TypeP: 'f'}
 			tmp2.Previus = tmp
 			tmp2.Next = tmp.Next
 			tmp.Next.Previus = &tmp2
@@ -85,7 +120,7 @@ func (list *SpacesList) FillList(tamanoTotal int) {
 
 	if tamanoTotal-list.End.Fin > 3 {
 		startP := list.End.Fin + 1
-		tmp2 := NodeSpaces{Inicio: startP, Fin: tamanoTotal, Status: 'f', Tamano: tamanoTotal - startP}
+		tmp2 := NodeSpaces{Inicio: startP, Fin: tamanoTotal, Status: 'f', Tamano: tamanoTotal - startP, TypeP: 'f'}
 		list.End.Next = &tmp2
 		tmp2.Previus = list.End
 		list.End = &tmp2

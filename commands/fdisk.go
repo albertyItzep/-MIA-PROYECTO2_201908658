@@ -41,12 +41,14 @@ func (tmp *Fdisk) Execute() string {
 	file.Close()
 	//verificamos el tipo de particion a crear
 	if tmp.Type == 'p' || tmp.Type == 'o' {
-		fmt.Println(tmp.MbrFdisk)
-		return tmp.PrimariPartition()
+		tmp2 := tmp.PrimariPartition()
+		return tmp2
 	} else if tmp.Type == 'e' {
-		return tmp.ExtendPartition()
+		tmp2 := tmp.ExtendPartition()
+		return tmp2
 	} else if tmp.Type == 'l' {
-		return tmp.LogicPartition()
+		tmp2 := tmp.LogicPartition()
+		return tmp2
 	}
 	return "Error al crear la particion"
 }
@@ -59,7 +61,6 @@ func (tmp *Fdisk) PrimariPartition() string {
 	}
 	//add of partition fit, type, name
 	isertDisc := tmp.StatusMemory()
-	tmp.MemoryList.ShowList()
 	if isertDisc {
 		partitionTmp.Part_fit = tmp.Fit
 		partitionTmp.Part_status = 'o'
@@ -112,7 +113,6 @@ func (fdisk *Fdisk) ExtendPartition() string {
 		}
 		//add of partition fit, type, name
 		isertDisc := fdisk.StatusMemory()
-		fdisk.MemoryList.ShowList()
 		if isertDisc {
 			partitionTmp.Part_status = 'o'
 			partitionTmp.Part_type = 'e'
@@ -152,7 +152,7 @@ func (fdisk *Fdisk) ExtendPartition() string {
 					return "Error en la escritura de la particion"
 				}
 				fdisk.StatusMemory()
-				return "Particion creada con exito"
+				return "Particion creada exitosamente ..."
 			} else {
 				return "El disco se encuentra fragmentado por ello no se encuentra el espacio disponible"
 			}
@@ -199,10 +199,10 @@ func (fdisk *Fdisk) LogicPartition() string {
 					if err != nil {
 						return "\033[31m[Error] > Al escribir el archivo" + "\033[0m"
 					}
-					return "Particion creada con exito ..."
+					return "Particion creada exitosamente ..."
 				} else {
 					listTmp := structs.SpacesList{}
-					for ebr.Part_next != 0 {
+					for ebr.Part_next > 0 {
 						listTmp.InsertNode(int(ebr.Part_start), int(ebr.Part_size+ebr.Part_start), 'o')
 						file.Seek(int64(ebr.Part_next), 0)
 						err = binary.Read(file, binary.LittleEndian, &ebr)
@@ -251,7 +251,7 @@ func (fdisk *Fdisk) LogicPartition() string {
 								return "\033[31m[Error] > Al leer el archivo" + "\033[0m"
 							}
 						}
-						return "Particion creada con exito ..."
+						return "Particion creada exitosamente ..."
 					} else {
 						return "El espacio para la particion de momento no se encuentra disponible"
 					}
@@ -266,7 +266,6 @@ func (fdisk *Fdisk) LogicPartition() string {
 	} else {
 		return "No existe particion Extendida"
 	}
-	return "Error al crear la particion Logica"
 }
 
 /*The function verify the status of dispotition of memory*/

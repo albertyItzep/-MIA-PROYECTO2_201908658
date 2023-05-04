@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/mia/proyecto2/structs"
 	"log"
 	"math"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+
+	"github.com/mia/proyecto2/structs"
 )
 
 type Mkgrp struct {
