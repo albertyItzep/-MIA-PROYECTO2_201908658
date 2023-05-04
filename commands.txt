@@ -26,3 +26,6 @@ mkfs >id=581b
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------
+rep >id=581a >path=/home/parte1/particiones/d1.jpg >name=disk #id XX1d1
+rep >id=582a >path=/home/parte1/particiones/d2.jpg >name=disk #id XX1d2
+rep >id=583a >path=/home/parte1/particiones/d3.jpg >name=disk #id XX1d3

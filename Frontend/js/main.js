@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded',() => {
 
     async function logoutSesion(){
         console.log("helo")
-        const envio = await fetch('http://127.0.0.1:8000/logout',{
+        const envio = await fetch('http://3.128.79.178/logout',{
         method : "GET"
         })
         const response = await envio.json()
@@ -31,12 +31,13 @@ document.addEventListener('DOMContentLoaded',() => {
     }
 
     async function ExecuteCommand(content) {
-        const envio = await fetch('http://127.0.0.1:8000/individualComand',{
+        const envio = await fetch('http://3.128.79.178/individualComand',{
          method : "POST",
          body : JSON.stringify({"cmd":content}),
         })
         document.getElementById("graph").textContent = ""
         const response = await envio.json()
+        console.log(response)
         let arrRes = response.Message
         let typeC = response.typeC
         if (typeC === "rep") {

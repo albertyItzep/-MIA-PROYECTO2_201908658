@@ -21,6 +21,9 @@ type User struct {
 type CmdComand struct {
 	Cmd string
 }
+type ResE struct {
+	Message, TypeC string
+}
 
 func main() {
 	router := mux.NewRouter()
@@ -90,7 +93,7 @@ func main() {
 		if matched, _ := regexp.Match("(rep)(.*)", []byte(comM.Cmd)); matched {
 			typeC = "rep"
 		}
-		res := struct{ Message, typeC string }{Message: mess, typeC: typeC}
+		res := ResE{Message: mess, TypeC: typeC}
 		json.NewEncoder(w).Encode(res)
 	}).Methods("POST")
 
