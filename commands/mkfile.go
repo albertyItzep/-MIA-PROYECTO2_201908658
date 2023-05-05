@@ -293,10 +293,13 @@ func (mkfile *Mkfile) CreateFile(file *os.File, superbloque *structs.SuperBlock,
 			for i := 0; i < resultado; i++ {
 				newBlockFile := structs.FileBlock{}
 				for x := 0; x < 64; x++ {
-					if cont == 10 {
+					if cont == 9 {
 						cont = 0
 					}
-					newBlockFile.B_content[x] = araCharacters[x]
+					if mkfile.SizeNewFile < 64 && x == mkfile.SizeNewFile {
+						break
+					}
+					newBlockFile.B_content[x] = araCharacters[cont]
 					cont++
 				}
 				cont = 0
