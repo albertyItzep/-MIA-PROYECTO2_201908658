@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         let content = {username,password,idparticion}
         console.log(username)
         if (username != "" && password != "" && idparticion != "") {
-            const envio = await fetch('http://127.0.0.1:8000/login',{
+            const envio = await fetch('http://3.14.134.83/login',{
             method : "POST",
             body : JSON.stringify(content),
             })
