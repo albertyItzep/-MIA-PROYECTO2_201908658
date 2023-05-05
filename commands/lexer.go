@@ -191,13 +191,17 @@ func (tmp *Lexer) CommandMkgrp() {
 
 /*the function execute the make a file*/
 func (tmp *Lexer) CommandMkfile() string {
-	pathNewFile := tmp.PathParameter(true)
-	sizeNewFile := tmp.SizeParameter(false)
-	startPartition := 133
-	PathDisk := "/home/user/disco1.dsk"
-	mkfile := Mkfile{PathNewFile: pathNewFile, PathDisk: PathDisk, SizeNewFile: sizeNewFile, StartPartition: startPartition}
-	mkfile.Execute()
-	return ""
+	if tmp.UserLoged.LogedUser() {
+		pathNewFile := tmp.PathParameter(true)
+		sizeNewFile := tmp.SizeParameter(false)
+		startPartition := tmp.UserLoged.StartPartition
+		PathDisk := tmp.UserLoged.PathFile
+		mkfile := Mkfile{PathNewFile: pathNewFile, PathDisk: PathDisk, SizeNewFile: sizeNewFile, StartPartition: startPartition}
+		mkfile.Execute()
+		return "Carpeta creada con exito"
+	} else {
+		return "Login Requerido"
+	}
 }
 
 /*the function execute the make a dir*/
