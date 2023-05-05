@@ -196,7 +196,11 @@ func (tmp *Lexer) CommandMkfile() string {
 		sizeNewFile := tmp.SizeParameter(false)
 		startPartition := tmp.UserLoged.StartPartition
 		PathDisk := tmp.UserLoged.PathFile
-		mkfile := Mkfile{PathNewFile: pathNewFile, PathDisk: PathDisk, SizeNewFile: sizeNewFile, StartPartition: startPartition}
+		createdRoots := false
+		if matched, _ := regexp.Match(">r", []byte(tmp.CommandString)); matched {
+			createdRoots = true
+		}
+		mkfile := Mkfile{PathNewFile: pathNewFile, PathDisk: PathDisk, SizeNewFile: sizeNewFile, StartPartition: startPartition, CreatePrevius: createdRoots}
 		mkfile.Execute()
 		return "Carpeta creada con exito"
 	} else {
@@ -210,7 +214,11 @@ func (tmp *Lexer) CommandMkdir() string {
 		pathFile := tmp.PathParameter(true)
 		startPartition := tmp.UserLoged.StartPartition
 		PathDisk := tmp.ListMount.ReturnPathitionWithId(tmp.UserLoged.IdPartition)
-		mkdir := Mkdir{PathNewDir: pathFile, PathDisk: PathDisk, StartPartition: startPartition, CreatePrevius: true}
+		createdRoots := false
+		if matched, _ := regexp.Match(">r", []byte(tmp.CommandString)); matched {
+			createdRoots = true
+		}
+		mkdir := Mkdir{PathNewDir: pathFile, PathDisk: PathDisk, StartPartition: startPartition, CreatePrevius: createdRoots}
 		return mkdir.Execute()
 	}
 	return "Login Necesario"
