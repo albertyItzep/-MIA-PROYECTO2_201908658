@@ -37,8 +37,8 @@ func (mkfs *Mkfs) Execute() {
 	superBlock.S_filesystem_type = 1
 	superBlock.S_inodes_count = int32(n)
 	superBlock.S_blocks_count = int32(3 * n)
-	superBlock.S_free_inodes_count = int32(n) - 2
-	superBlock.S_free_blocks_count = int32(3*n) - 2
+	superBlock.S_free_inodes_count = int32(n) - 5
+	superBlock.S_free_blocks_count = int32(3*n) - 5
 	superBlock.S_mtime = mkfs.ReturnDate8Bytes()
 	superBlock.S_mnt_count = 1
 	superBlock.S_magic = 0xEF53
@@ -74,10 +74,12 @@ func (mkfs *Mkfs) Execute() {
 	}
 
 	//escribimos el bitmapInodes
-	buffer := '0'
-	buffer2 := '1'
+	var buffer, buffer2 byte
+	buffer = '0'
+	buffer2 = '1'
 	for i := 0; i < int(n); i++ {
-		file.Seek(int64(int(superBlock.S_bm_inode_start)+i), 0)
+		pos := int(superBlock.S_bm_inode_start) + i
+		file.Seek(int64(pos), 0)
 		err = binary.Write(file, binary.LittleEndian, &buffer)
 		if err != nil {
 			fmt.Println("\033[31m[Error] > Error al escribir el bitmapInodes:", err, "\033[0m")

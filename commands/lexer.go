@@ -47,9 +47,9 @@ func (tmp *Lexer) GeneralComand(command string) string {
 	} else if matched, _ := regexp.Match("(rmuser)(.*)", []byte(tmp.CommandString)); matched {
 		fmt.Println("contiene el comando rmuser")
 	} else if matched, _ := regexp.Match("(mkfile)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando mkfile")
+		return tmp.CommandMkfile()
 	} else if matched, _ := regexp.Match("(mkdir)(.*)", []byte(tmp.CommandString)); matched {
-		fmt.Println("contiene el comando mkdir")
+		return tmp.CommandMkdir()
 	}
 	return "Error"
 }
@@ -187,6 +187,29 @@ func (tmp *Lexer) CommandMkgrp() {
 	} else {
 		fmt.Println("Sesion invalida")
 	}
+}
+
+/*the function execute the make a file*/
+func (tmp *Lexer) CommandMkfile() string {
+	pathNewFile := tmp.PathParameter(true)
+	sizeNewFile := tmp.SizeParameter(false)
+	startPartition := 133
+	PathDisk := "/home/user/disco1.dsk"
+	mkfile := Mkfile{PathNewFile: pathNewFile, PathDisk: PathDisk, SizeNewFile: sizeNewFile, StartPartition: startPartition}
+	mkfile.Execute()
+	return ""
+}
+
+/*the function execute the make a dir*/
+func (tmp *Lexer) CommandMkdir() string {
+	if tmp.UserLoged.LogedUser() {
+		pathFile := tmp.PathParameter(true)
+		startPartition := tmp.UserLoged.StartPartition
+		PathDisk := tmp.ListMount.ReturnPathitionWithId(tmp.UserLoged.IdPartition)
+		mkdir := Mkdir{PathNewDir: pathFile, PathDisk: PathDisk, StartPartition: startPartition, CreatePrevius: true}
+		return mkdir.Execute()
+	}
+	return "Login Necesario"
 }
 
 /*The function create the code for reports*/

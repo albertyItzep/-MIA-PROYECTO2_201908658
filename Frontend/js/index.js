@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   async function ExecuteCommand(content) {
-     const envio = await fetch('http://3.128.79.178/execute',{
+     const envio = await fetch('http://127.0.0.1:8000/execute',{
       method : "POST",
       body : JSON.stringify({"cmd":content}),
      })

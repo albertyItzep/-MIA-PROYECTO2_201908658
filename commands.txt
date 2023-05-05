@@ -20,7 +20,6 @@ mount >path=/home/user/Disco2.dsk >name=Particion1
 mount >path=/home/user/Disco2.dsk >name=Particion2
 #----------------- mkfs -----------------
 mkfs >type=full >id=581a
-mkfs >id=581b
 
 ----------------- mdisk -----------------
 ----------------- mdisk -----------------
@@ -29,3 +28,5 @@ mkfs >id=581b
 rep >id=581a >path=/home/parte1/particiones/d1.jpg >name=disk #id XX1d1
 rep >id=582a >path=/home/parte1/particiones/d2.jpg >name=disk #id XX1d2
 rep >id=583a >path=/home/parte1/particiones/d3.jpg >name=disk #id XX1d3
+
+mkdir >r >path=/home/user/docs/usac

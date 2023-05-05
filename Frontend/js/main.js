@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded',() => {
     }
 
     async function ExecuteCommand(content) {
-        const envio = await fetch('http://3.128.79.178/individualComand',{
+        const envio = await fetch('http://127.0.0.1:8000/individualComand',{
          method : "POST",
          body : JSON.stringify({"cmd":content}),
         })
@@ -39,15 +39,19 @@ document.addEventListener('DOMContentLoaded',() => {
         const response = await envio.json()
         console.log(response)
         let arrRes = response.Message
-        let typeC = response.typeC
+        let typeC = response.TypeC
         if (typeC === "rep") {
             console.log(arrRes)
-            d3.select("#graph")
-            .graphviz()
-                .dot(arrRes)
-                .render();
+            if (arrRes === "No Login") {
+                alert("Debe estar logeado")    
+            } else {
+                d3.select("#graph")
+                .graphviz()
+                    .dot(arrRes)
+                    .render();
+            }
         } else {
-            alert(Message)
+            alert(arrRes)
         }
     }
     
